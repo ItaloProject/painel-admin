@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Users, LogOut, ShieldCheck,
-  ChevronDown, Wallet, UtensilsCrossed, Check,
+  ChevronDown, Wallet, UtensilsCrossed, Check, Store, KeyRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,20 +28,22 @@ const APPS = [
     color: "bg-orange-500",
     nav: [
       { href: "/foods", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/foods/usuarios", label: "Usuários", icon: Users },
-      { href: "/foods/auditoria", label: "Auditoria", icon: ShieldCheck },
+      { href: "/foods/pizzarias", label: "Pizzarias", icon: Store },
+      { href: "/foods/acessos", label: "Acessos", icon: KeyRound },
     ],
   },
 ] as const;
 
 type AppId = (typeof APPS)[number]["id"];
 
+const ROOT_HREFS: string[] = ["/", "/foods"];
+
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [appId, setAppId] = useState<AppId>("financeiro");
   const [open, setOpen] = useState(false);
 
+  const appId: AppId = pathname.startsWith("/foods") ? "foods" : "financeiro";
   const app = APPS.find(a => a.id === appId)!;
   const AppIcon = app.icon;
 
@@ -51,8 +53,8 @@ export function Sidebar() {
   }
 
   function selectApp(id: AppId) {
-    setAppId(id);
     setOpen(false);
+    if (id !== appId) router.push(APPS.find(a => a.id === id)!.nav[0].href);
   }
 
   return (
@@ -109,7 +111,7 @@ export function Sidebar() {
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-1 px-2 flex flex-col gap-0.5">
         {app.nav.map(({ href, label, icon: Icon }) => {
-          const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+          const active = ROOT_HREFS.includes(href) ? pathname === href : pathname.startsWith(href);
           return (
             <Link
               key={href}
