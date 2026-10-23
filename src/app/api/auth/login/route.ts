@@ -53,8 +53,8 @@ export async function POST(req: NextRequest) {
   const { email, password } = await req.json().catch(() => ({ email: "", password: "" }));
 
   const validEmail = email === process.env.ADMIN_EMAIL;
-  const b64 = process.env.ADMIN_PASSWORD_HASH_B64 ?? "";
-  const hash = b64 ? Buffer.from(b64, "base64").toString("utf8") : "";
+  const b64 = (process.env.ADMIN_PASSWORD_HASH_B64 ?? "").trim();
+  const hash = b64 ? Buffer.from(b64, "base64").toString("utf8").trim() : "";
   const validPassword = hash ? await bcrypt.compare(password ?? "", hash) : false;
 
   if (!validEmail || !validPassword) {
