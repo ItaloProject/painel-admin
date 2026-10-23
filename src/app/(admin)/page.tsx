@@ -1,10 +1,12 @@
+export const dynamic = "force-dynamic";
+
 import sql from "@/lib/db";
 import { Users, TrendingUp, Activity, ShieldCheck } from "lucide-react";
 
 async function getStats() {
   const [users, active, leads] = await Promise.all([
     sql`SELECT COUNT(*)::int AS n FROM app_users`.then(r => r[0].n as number),
-    sql`SELECT COUNT(*)::int AS n FROM app_users WHERE subscription_active = true`.then(r => r[0].n as number).catch(() => 0),
+    sql`SELECT COUNT(*)::int AS n FROM app_users WHERE is_admin = true OR (paid_until IS NOT NULL AND paid_until::date >= CURRENT_DATE)`.then(r => r[0].n as number).catch(() => 0),
     sql`SELECT COUNT(*)::int AS n FROM leads`.then(r => r[0].n as number).catch(() => 0),
   ]);
   return { users, active, leads };
@@ -21,7 +23,7 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="p-8 max-w-5xl">
+    <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
         <p className="text-muted-foreground text-sm mt-1">Visão geral do MUVO</p>

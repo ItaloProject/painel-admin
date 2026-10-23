@@ -39,12 +39,12 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
-        <div className="mb-8 text-center">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-foreground text-background font-bold text-xl mb-3">
-            M
+        <div className="mb-8 text-center flex flex-col items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-dark.png" alt="MUVO" className="h-10 w-auto object-contain" />
+          <div>
+            <p className="text-sm text-muted-foreground">Acesso restrito à equipe</p>
           </div>
-          <h1 className="text-xl font-bold text-foreground">MUVO Admin</h1>
-          <p className="text-sm text-muted-foreground mt-1">Acesso restrito à equipe</p>
         </div>
 
         {/* Card */}
