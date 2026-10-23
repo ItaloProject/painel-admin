@@ -1,10 +1,25 @@
 import postgres from "postgres";
 
-const create = () =>
-  postgres(process.env.FOODS_DATABASE_URL!, { prepare: false, max: 5, idle_timeout: 20, onnotice: () => {} });
+type Sql = ReturnType<typeof postgres>;
 
-const cache = globalThis as unknown as { __sql_foods?: ReturnType<typeof create> };
-const sqlFoods = cache.__sql_foods ?? create();
-if (process.env.NODE_ENV !== "production") cache.__sql_foods = sqlFoods;
+let instance: Sql | undefined;
+
+function get(): Sql {
+  if (!instance) {
+    instance = postgres(process.env.FOODS_DATABASE_URL!, {
+      prepare: false, max: 5, idle_timeout: 20, onnotice: () => {},
+    });
+  }
+  return instance;
+}
+
+const sqlFoods = new Proxy(function () {} as unknown as Sql, {
+  apply(_t, _this, args) {
+    return (get() as unknown as (...a: unknown[]) => unknown)(...args);
+  },
+  get(_t, prop) {
+    return (get() as unknown as Record<string | symbol, unknown>)[prop];
+  },
+});
 
 export default sqlFoods;
