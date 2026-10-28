@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Users, LogOut, ShieldCheck,
-  ChevronDown, Wallet, UtensilsCrossed, Check, Store, KeyRound, Settings,
+  ChevronDown, Wallet, UtensilsCrossed, Check, Store, KeyRound, Settings, Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +30,7 @@ const APPS = [
       { href: "/foods", label: "Dashboard", icon: LayoutDashboard },
       { href: "/foods/pizzarias", label: "Pizzarias", icon: Store },
       { href: "/foods/acessos", label: "Acessos", icon: KeyRound },
+      { href: "/foods/cobranca", label: "Cobrança", icon: Receipt },
     ],
   },
 ] as const;
