@@ -6,13 +6,14 @@ export type AcessoRow = {
   papel: "admin" | "dono";
   pizzaria_slug: string | null;
   pizzaria_nome: string | null;
+  bloqueado: boolean;
   criado_em: string;
 };
 
 export async function listAcessos(): Promise<AcessoRow[]> {
   const rows = await sqlFoods`
     SELECT a.id::text AS id, a.email, a.papel, a.pizzaria_slug,
-           p.pizzaria->>'nome' AS pizzaria_nome, a.criado_em
+           p.pizzaria->>'nome' AS pizzaria_nome, a.bloqueado, a.criado_em
     FROM acessos a
     LEFT JOIN pizzarias p ON p.slug = a.pizzaria_slug
     ORDER BY (a.papel = 'admin') DESC, a.criado_em DESC

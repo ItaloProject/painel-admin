@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Pencil, ShieldCheck, Store, Trash2, UserPlus } from "lucide-react";
+import { Ban, Loader2, Pencil, ShieldCheck, Store, Trash2, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AcessoRow } from "@/lib/foods-acessos";
 import { ActionBtn, Field, Modal, StatCard, inputCls, primaryBtn } from "@/components/ui-bits";
@@ -119,9 +119,21 @@ function DeleteModal({ acesso, onClose, onDeleted }: { acesso: AcessoRow; onClos
 export function AcessosList({ initial, pizzarias }: { initial: AcessoRow[]; pizzarias: Pizzaria[] }) {
   const [items, setItems] = useState(initial);
   const [modal, setModal] = useState<ModalState>(null);
+  const [bloqueandoId, setBloqueandoId] = useState<string | null>(null);
 
   function upsert(a: AcessoRow) {
     setItems(list => (list.some(x => x.id === a.id) ? list.map(x => (x.id === a.id ? a : x)) : [a, ...list]));
+  }
+
+  async function toggleBloqueado(a: AcessoRow) {
+    setBloqueandoId(a.id);
+    const res = await fetch(`/api/foods/acessos/${a.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bloqueado: !a.bloqueado }),
+    });
+    if (res.ok) upsert(await res.json());
+    setBloqueandoId(null);
   }
 
   return (
@@ -140,10 +152,11 @@ export function AcessosList({ initial, pizzarias }: { initial: AcessoRow[]; pizz
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="grid grid-cols-4 gap-3 mb-5">
         <StatCard label="Total" value={items.length} />
         <StatCard label="Admins" value={items.filter(a => a.papel === "admin").length} tone="text-emerald-500" />
         <StatCard label="Donos" value={items.filter(a => a.papel === "dono").length} />
+        <StatCard label="Bloqueados" value={items.filter(a => a.bloqueado).length} tone="text-destructive" />
       </div>
 
       <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
@@ -157,19 +170,35 @@ export function AcessosList({ initial, pizzarias }: { initial: AcessoRow[]; pizz
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-semibold text-foreground text-sm truncate">{a.email}</span>
+                <span className={cn("font-semibold text-sm truncate", a.bloqueado ? "text-muted-foreground line-through" : "text-foreground")}>
+                  {a.email}
+                </span>
                 <span className={cn(
                   "text-[10px] font-semibold px-2 py-0.5 rounded-full",
                   a.papel === "admin" ? "bg-emerald-500/15 text-emerald-600" : "bg-orange-500/15 text-orange-600"
                 )}>
                   {a.papel === "admin" ? "Admin" : "Dono"}
                 </span>
+                {a.bloqueado && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-destructive/15 text-destructive">
+                    Bloqueado
+                  </span>
+                )}
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {a.papel === "admin" ? "Todas as pizzarias" : `${a.pizzaria_nome ?? a.pizzaria_slug} (/${a.pizzaria_slug})`}
               </p>
             </div>
             <div className="flex items-center gap-1 shrink-0">
+              <ActionBtn
+                title={a.bloqueado ? "Desbloquear" : "Bloquear"}
+                onClick={() => toggleBloqueado(a)}
+                active={a.bloqueado}
+              >
+                {bloqueandoId === a.id
+                  ? <Loader2 className="h-4 w-4 animate-spin" />
+                  : <Ban className="h-4 w-4" />}
+              </ActionBtn>
               <ActionBtn title="Editar" onClick={() => setModal({ type: "form", acesso: a })}>
                 <Pencil className="h-4 w-4" />
               </ActionBtn>

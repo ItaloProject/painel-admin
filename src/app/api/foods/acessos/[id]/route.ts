@@ -16,6 +16,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!current) return NextResponse.json({ error: "Acesso não encontrado." }, { status: 404 });
 
   const body = await req.json().catch(() => ({}));
+
+  // Bloqueio/desbloqueio: aceita PATCH { bloqueado } isolado
+  if (typeof body.bloqueado === "boolean" && Object.keys(body).length === 1) {
+    await sqlFoods`UPDATE acessos SET bloqueado = ${body.bloqueado} WHERE id = ${id}::bigint`;
+    return NextResponse.json(await getAcesso(id));
+  }
+
   const papel = body.papel ?? current.papel;
   const slug = papel === "dono" ? String(body.pizzaria_slug ?? current.pizzaria_slug ?? "").trim() : null;
 
