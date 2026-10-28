@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
+import sql from "@/lib/db";
+
+/** Busca o hash atual: DB tem prioridade sobre a env var. */
+async function getCurrentHash(): Promise<string> {
+  try {
+    const rows = await sql`SELECT value FROM muvo_config WHERE key = 'admin_password_hash' LIMIT 1`;
+    if (rows.length) return String(rows[0].value).trim();
+  } catch {
+    /* tabela ainda não existe — usa env */
+  }
+  const b64 = (process.env.ADMIN_PASSWORD_HASH_B64 ?? "").trim();
+  return b64 ? Buffer.from(b64, "base64").toString("utf8").trim() : "";
+}
 
 // Rate limiting: máx 5 tentativas por IP em 15 minutos
 const attempts = new Map<string, { count: number; resetAt: number }>();
@@ -53,8 +66,7 @@ export async function POST(req: NextRequest) {
   const { email, password } = await req.json().catch(() => ({ email: "", password: "" }));
 
   const validEmail = email === process.env.ADMIN_EMAIL;
-  const b64 = (process.env.ADMIN_PASSWORD_HASH_B64 ?? "").trim();
-  const hash = b64 ? Buffer.from(b64, "base64").toString("utf8").trim() : "";
+  const hash = await getCurrentHash();
   const validPassword = hash ? await bcrypt.compare(password ?? "", hash) : false;
 
   if (!validEmail || !validPassword) {

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Users, LogOut, ShieldCheck,
-  ChevronDown, Wallet, UtensilsCrossed, Check, Store, KeyRound,
+  ChevronDown, Wallet, UtensilsCrossed, Check, Store, KeyRound, Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -130,8 +130,20 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Logout */}
-      <div className="p-2 border-t border-[hsl(var(--sidebar-border))]">
+      {/* Bottom links */}
+      <div className="p-2 border-t border-[hsl(var(--sidebar-border))] flex flex-col gap-0.5">
+        <Link
+          href="/configuracoes"
+          className={cn(
+            "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+            pathname === "/configuracoes"
+              ? "bg-[hsl(var(--sidebar-primary)/0.15)] text-[hsl(var(--sidebar-primary))]"
+              : "text-[hsl(var(--sidebar-foreground)/0.65)] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-foreground))]"
+          )}
+        >
+          <Settings className="h-4 w-4 shrink-0" />
+          Configurações
+        </Link>
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[hsl(var(--sidebar-foreground)/0.65)] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-foreground))] transition-colors"
