@@ -34,3 +34,58 @@ export async function listPizzarias(): Promise<PizzariaRow[]> {
 
 export const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,48}$/;
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// ----- tipos do cardápio -----
+
+export type Tamanho = { id: string; nome: string; detalhe?: string };
+export type Borda   = { nome: string; preco: number };
+export type Adicional = { nome: string; preco: number };
+export type Item = {
+  id: string;
+  nome: string;
+  descricao?: string;
+  preco: Record<string, number> | number;
+  tags?: string[];
+};
+export type Categoria = {
+  id: string;
+  nome: string;
+  emoji?: string;
+  itens: Item[];
+};
+export type Cardapio = {
+  categorias: Categoria[];
+  tamanhos: Tamanho[];
+  bordas: Borda[];
+  adicionais: Adicional[];
+};
+
+export type PizzariaDetalhe = {
+  slug: string;
+  nome: string;
+  publicado: boolean;
+  atualizado_em: string;
+  acessos: number;
+  cardapio: Cardapio;
+};
+
+export async function getPizzaria(slug: string): Promise<PizzariaDetalhe | null> {
+  const rows = await sqlFoods`
+    SELECT
+      p.slug,
+      COALESCE(p.pizzaria->>'nome', p.slug) AS nome,
+      p.publicado,
+      p.atualizado_em,
+      p.cardapio,
+      (SELECT COUNT(*) FROM acessos a WHERE a.pizzaria_slug = p.slug)::int AS acessos
+    FROM pizzarias p
+    WHERE p.slug = ${slug}
+    LIMIT 1
+  `;
+  if (!rows.length) return null;
+  const r = rows[0] as {
+    slug: string; nome: string; publicado: boolean;
+    atualizado_em: string; cardapio: unknown; acessos: number;
+  };
+  return { ...r, cardapio: (r.cardapio as Cardapio) ?? { categorias: [], tamanhos: [], bordas: [], adicionais: [] } };
+}

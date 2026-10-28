@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Eye, EyeOff, Loader2, Plus, Store, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PizzariaRow } from "@/lib/foods";
@@ -130,13 +131,16 @@ export function PizzariasList({ initial }: { initial: PizzariaRow[] }) {
 
       <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
         {items.map(p => (
-          <div key={p.slug} className="flex items-center gap-4 px-5 py-4 hover:bg-accent/20 transition-colors">
+          <div key={p.slug} className="flex items-center gap-4 px-5 py-4 hover:bg-accent/20 transition-colors group">
             <div className="h-10 w-10 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0">
               <Store className="h-5 w-5" />
             </div>
-            <div className="flex-1 min-w-0">
+            {/* Área clicável → detalhe */}
+            <Link href={`/foods/pizzarias/${p.slug}`} className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-semibold text-foreground text-sm truncate">{p.nome}</span>
+                <span className="font-semibold text-foreground text-sm truncate group-hover:underline underline-offset-2">
+                  {p.nome}
+                </span>
                 <span className={cn(
                   "text-[10px] font-semibold px-2 py-0.5 rounded-full",
                   p.publicado ? "bg-emerald-500/15 text-emerald-600" : "bg-muted text-muted-foreground"
@@ -151,7 +155,7 @@ export function PizzariasList({ initial }: { initial: PizzariaRow[] }) {
                 /{p.slug} · {p.categorias} categorias · {p.itens} itens · atualizada em{" "}
                 {new Date(p.atualizado_em).toLocaleDateString("pt-BR", { day: "numeric", month: "short" })}
               </p>
-            </div>
+            </Link>
             <div className="flex items-center gap-1 shrink-0">
               <ActionBtn title={p.publicado ? "Despublicar" : "Publicar"} onClick={() => togglePublicado(p)} active={p.publicado}>
                 {p.publicado ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
