@@ -1,4 +1,42 @@
 import sql from "@/lib/db";
+import sqlFoods from "@/lib/db-foods";
+
+export interface ComissaoRow {
+  pizzaria_slug: string;
+  pizzaria_nome: string;
+  pedidos_pix: number;
+  centavos_total: number; // em centavos (inteiro)
+}
+
+export async function getCentavosMes(
+  mes: string,
+  slugsNomes: { slug: string; nome: string }[]
+): Promise<ComissaoRow[]> {
+  const mesDate = mesParaDate(mes);
+  const rows = await sqlFoods<{
+    pizzaria_slug: string;
+    pedidos_pix: string;
+    centavos_total: string;
+  }[]>`
+    SELECT
+      pizzaria_slug,
+      COUNT(*)::text                       AS pedidos_pix,
+      COALESCE(SUM(centavos_pix), 0)::text AS centavos_total
+    FROM pedidos
+    WHERE pagamento = 'Pix'
+      AND pagamento_status = 'confirmado'
+      AND date_trunc('month', criado_em AT TIME ZONE 'America/Sao_Paulo')
+          = date_trunc('month', ${mesDate}::date)
+    GROUP BY pizzaria_slug
+  `;
+  const nomeMap = Object.fromEntries(slugsNomes.map(p => [p.slug, p.nome]));
+  return rows.map(r => ({
+    pizzaria_slug: r.pizzaria_slug,
+    pizzaria_nome: nomeMap[r.pizzaria_slug] ?? r.pizzaria_slug,
+    pedidos_pix: parseInt(r.pedidos_pix, 10),
+    centavos_total: parseInt(r.centavos_total, 10),
+  }));
+}
 
 export type StatusCobranca = "pago" | "pendente" | "atrasado";
 
