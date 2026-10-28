@@ -74,17 +74,28 @@ export default async function PizzariaDetalhePage({ params }: { params: Promise<
             /{p.slug} · atualizada em{" "}
             {new Date(p.atualizado_em).toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}
           </p>
-          {p.url_publica && (
+          <div className="flex flex-wrap gap-3 mt-2">
+            {p.url_publica && (
+              <a
+                href={p.url_publica}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-orange-600 hover:text-orange-500 transition-colors"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Ver cardápio público
+              </a>
+            )}
             <a
-              href={p.url_publica}
+              href="https://painel-cardapio.pages.dev"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium text-orange-600 hover:text-orange-500 transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               <ExternalLink className="h-3 w-3" />
-              Ver cardápio público
+              Painel do cardápio (dono)
             </a>
-          )}
+          </div>
         </div>
       </div>
 
