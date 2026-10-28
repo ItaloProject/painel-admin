@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import sql from "@/lib/db";
+import { log } from "@/lib/auditoria";
 
 /** Busca o hash atual: DB tem prioridade sobre a env var. */
 async function getCurrentHash(): Promise<string> {
@@ -77,6 +78,7 @@ export async function POST(req: NextRequest) {
   }
 
   clearAttempts(ip);
+  await log("login", "sessao", email);
 
   const jar = await cookies();
   jar.set("admin_session", "1", {

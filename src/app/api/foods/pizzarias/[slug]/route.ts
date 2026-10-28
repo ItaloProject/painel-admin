@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import sqlFoods from "@/lib/db-foods";
 import { requireAdminSession } from "@/lib/admin-auth";
 import { listPizzarias } from "@/lib/foods";
+import { log } from "@/lib/auditoria";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const denied = await requireAdminSession();
@@ -12,6 +13,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ sl
 
   if (typeof body.publicado === "boolean") {
     await sqlFoods`UPDATE pizzarias SET publicado = ${body.publicado}, atualizado_em = now() WHERE slug = ${slug}`;
+    await log("update", "pizzaria", slug, { publicado: body.publicado });
   }
 
   const row = (await listPizzarias()).find(p => p.slug === slug);
@@ -25,5 +27,6 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ slu
 
   const { slug } = await params;
   await sqlFoods`DELETE FROM pizzarias WHERE slug = ${slug}`;
+  await log("delete", "pizzaria", slug);
   return NextResponse.json({ ok: true });
 }

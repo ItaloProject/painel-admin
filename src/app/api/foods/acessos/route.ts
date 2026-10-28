@@ -3,6 +3,7 @@ import sqlFoods from "@/lib/db-foods";
 import { requireAdminSession } from "@/lib/admin-auth";
 import { EMAIL_RE } from "@/lib/foods";
 import { listAcessos } from "@/lib/foods-acessos";
+import { log } from "@/lib/auditoria";
 
 export async function POST(req: NextRequest) {
   const denied = await requireAdminSession();
@@ -33,5 +34,6 @@ export async function POST(req: NextRequest) {
   }
 
   const created = (await listAcessos()).find(a => a.id === id);
+  await log("create", "acesso", email, { papel, pizzaria_slug: slug });
   return NextResponse.json(created, { status: 201 });
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import sqlFoods from "@/lib/db-foods";
 import { requireAdminSession } from "@/lib/admin-auth";
 import { SLUG_RE, listPizzarias } from "@/lib/foods";
+import { log } from "@/lib/auditoria";
 
 export async function POST(req: NextRequest) {
   const denied = await requireAdminSession();
@@ -35,5 +36,6 @@ export async function POST(req: NextRequest) {
   }
 
   const created = (await listPizzarias()).find(p => p.slug === slug);
+  await log("create", "pizzaria", slug, { nome });
   return NextResponse.json(created, { status: 201 });
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import sql from "@/lib/db";
 import { requireAdminSession } from "@/lib/admin-auth";
+import { log } from "@/lib/auditoria";
 
 /** Hash atual: DB primeiro, depois env var. */
 async function getCurrentHash(): Promise<string> {
@@ -39,5 +40,6 @@ export async function POST(req: NextRequest) {
     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, atualizado_em = now()
   `;
 
+  await log("senha", "configuracao", "admin_password_hash");
   return NextResponse.json({ ok: true });
 }

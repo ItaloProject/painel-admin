@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import sqlFoods from "@/lib/db-foods";
 import { requireAdminSession } from "@/lib/admin-auth";
 import { getAcesso, otherAdminsCount } from "@/lib/foods-acessos";
+import { log } from "@/lib/auditoria";
 
 const LAST_ADMIN = "Não é possível remover o último admin do cardápio.";
 
@@ -20,6 +21,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   // Bloqueio/desbloqueio: aceita PATCH { bloqueado } isolado
   if (typeof body.bloqueado === "boolean" && Object.keys(body).length === 1) {
     await sqlFoods`UPDATE acessos SET bloqueado = ${body.bloqueado} WHERE id = ${id}::bigint`;
+    await log(body.bloqueado ? "bloquear" : "desbloquear", "acesso", current.email);
     return NextResponse.json(await getAcesso(id));
   }
 
@@ -41,6 +43,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     throw e;
   }
 
+  await log("update", "acesso", current.email, { papel, pizzaria_slug: slug });
   return NextResponse.json(await getAcesso(id));
 }
 
@@ -58,5 +61,6 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   }
 
   await sqlFoods`DELETE FROM acessos WHERE id = ${id}::bigint`;
+  await log("delete", "acesso", current.email, { papel: current.papel });
   return NextResponse.json({ ok: true });
 }
