@@ -9,10 +9,12 @@ import { StatCard } from "@/components/ui-bits";
 export default async function FoodsDashboard() {
   const [pizzarias, acessos] = await Promise.all([listPizzarias(), listAcessos()]);
 
+  const MENSALIDADE = 65;
   const publicadas = pizzarias.filter(p => p.publicado).length;
   const itens = pizzarias.reduce((s, p) => s + p.itens, 0);
   const donos = acessos.filter(a => a.papel === "dono").length;
   const semDono = pizzarias.filter(p => p.acessos === 0);
+  const mrr = pizzarias.length * MENSALIDADE;
 
   return (
     <>
@@ -21,11 +23,16 @@ export default async function FoodsDashboard() {
         <p className="text-muted-foreground text-sm mt-1">Visão geral dos cardápios digitais</p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
         <StatCard label="Pizzarias" value={pizzarias.length} />
         <StatCard label="Publicadas" value={publicadas} tone="text-emerald-500" />
         <StatCard label="Itens no cardápio" value={itens} />
         <StatCard label="Donos com acesso" value={donos} />
+        <StatCard
+          label="Receita Mensal"
+          value={`R$ ${mrr.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+          tone="text-emerald-500"
+        />
       </div>
 
       {semDono.length > 0 && (
