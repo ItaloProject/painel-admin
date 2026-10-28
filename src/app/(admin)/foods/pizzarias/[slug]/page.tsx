@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ChevronRight, Store } from "lucide-react";
+import { ArrowLeft, ChevronRight, ExternalLink, Store } from "lucide-react";
 import { getPizzaria, type Cardapio } from "@/lib/foods";
 import { cn } from "@/lib/utils";
 
@@ -74,6 +74,17 @@ export default async function PizzariaDetalhePage({ params }: { params: Promise<
             /{p.slug} · atualizada em{" "}
             {new Date(p.atualizado_em).toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}
           </p>
+          {p.url_publica && (
+            <a
+              href={p.url_publica}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium text-orange-600 hover:text-orange-500 transition-colors"
+            >
+              <ExternalLink className="h-3 w-3" />
+              Ver cardápio público
+            </a>
+          )}
         </div>
       </div>
 

@@ -66,6 +66,7 @@ export type PizzariaDetalhe = {
   publicado: boolean;
   atualizado_em: string;
   acessos: number;
+  url_publica?: string;
   cardapio: Cardapio;
 };
 
@@ -77,6 +78,7 @@ export async function getPizzaria(slug: string): Promise<PizzariaDetalhe | null>
       p.publicado,
       p.atualizado_em,
       p.cardapio,
+      p.pizzaria->>'url_publica' AS url_publica,
       (SELECT COUNT(*) FROM acessos a WHERE a.pizzaria_slug = p.slug)::int AS acessos
     FROM pizzarias p
     WHERE p.slug = ${slug}
@@ -85,7 +87,7 @@ export async function getPizzaria(slug: string): Promise<PizzariaDetalhe | null>
   if (!rows.length) return null;
   const r = rows[0] as {
     slug: string; nome: string; publicado: boolean;
-    atualizado_em: string; cardapio: unknown; acessos: number;
+    atualizado_em: string; cardapio: unknown; acessos: number; url_publica?: string;
   };
   return { ...r, cardapio: (r.cardapio as Cardapio) ?? { categorias: [], tamanhos: [], bordas: [], adicionais: [] } };
 }
