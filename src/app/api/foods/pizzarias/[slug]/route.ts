@@ -16,6 +16,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ sl
     await log("update", "pizzaria", slug, { publicado: body.publicado });
   }
 
+  if (body.plano === "normal" || body.plano === "premium") {
+    await sqlFoods`UPDATE pizzarias SET plano = ${body.plano} WHERE slug = ${slug}`;
+    await log("update", "pizzaria", slug, { plano: body.plano });
+  }
+
   const row = (await listPizzarias()).find(p => p.slug === slug);
   if (!row) return NextResponse.json({ error: "Pizzaria não encontrada." }, { status: 404 });
   return NextResponse.json(row);

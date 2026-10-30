@@ -4,6 +4,7 @@ export type PizzariaRow = {
   slug: string;
   nome: string;
   publicado: boolean;
+  plano: "normal" | "premium";
   categorias: number;
   itens: number;
   acessos: number;
@@ -16,6 +17,7 @@ export async function listPizzarias(): Promise<PizzariaRow[]> {
       p.slug,
       COALESCE(p.pizzaria->>'nome', p.slug) AS nome,
       p.publicado,
+      p.plano,
       p.atualizado_em,
       CASE WHEN jsonb_typeof(p.cardapio->'categorias') = 'array'
            THEN jsonb_array_length(p.cardapio->'categorias') ELSE 0 END AS categorias,

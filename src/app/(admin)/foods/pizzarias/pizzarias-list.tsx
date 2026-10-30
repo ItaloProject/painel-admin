@@ -107,6 +107,19 @@ export function PizzariasList({ initial }: { initial: PizzariaRow[] }) {
     }
   }
 
+  async function togglePlano(p: PizzariaRow) {
+    const novo = p.plano === "premium" ? "normal" : "premium";
+    const res = await fetch(`/api/foods/pizzarias/${p.slug}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plano: novo }),
+    });
+    if (res.ok) {
+      const updated: PizzariaRow = await res.json();
+      setItems(list => list.map(x => (x.slug === updated.slug ? updated : x)));
+    }
+  }
+
   return (
     <>
       <div className="mb-6 flex items-start justify-between">
@@ -157,6 +170,16 @@ export function PizzariasList({ initial }: { initial: PizzariaRow[] }) {
               </p>
             </Link>
             <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => togglePlano(p)}
+                title={p.plano === "premium" ? "Mudar para o plano normal (cardápio digital)" : "Mudar para o plano premium (completo)"}
+                className={cn(
+                  "rounded-lg border px-2.5 py-1 text-xs font-semibold transition-colors",
+                  p.plano === "premium" ? "border-violet-500/40 bg-violet-500/10 text-violet-600 hover:bg-violet-500/20" : "border-border bg-muted text-muted-foreground hover:bg-accent"
+                )}
+              >
+                {p.plano === "premium" ? "Premium" : "Normal"}
+              </button>
               <ActionBtn title={p.publicado ? "Despublicar" : "Publicar"} onClick={() => togglePublicado(p)} active={p.publicado}>
                 {p.publicado ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
               </ActionBtn>
